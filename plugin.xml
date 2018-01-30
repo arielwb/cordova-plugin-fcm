@@ -67,7 +67,6 @@
 		
         <framework src="com.google.firebase:firebase-core:11.4.2" />
         <framework src="com.google.firebase:firebase-messaging:11.4.2" />
-        <framework src="com.google.code.gson:gson:2.8.2" />
 		
 		<framework src="src/android/FCMPlugin.gradle" custom="true" type="gradleReference"/>
 			

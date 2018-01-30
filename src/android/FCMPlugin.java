@@ -14,10 +14,6 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
-import com.google.gson.Gson;
-import com.google.common.reflect.TypeToken;
-import java.lang.reflect.Type;
-
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.iid.FirebaseInstanceId;
 
