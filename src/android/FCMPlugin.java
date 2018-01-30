@@ -145,12 +145,12 @@ public class FCMPlugin extends CordovaPlugin {
 			}else {
 				Log.d(TAG, "\tView not ready. SAVED NOTIFICATION: " + callBack);
 				lastPush = payload;
-				FCMPlugin.savePush(payload);
+				FCMPlugin.savePush(payload.toString());
 			}
 		} catch (Exception e) {
 			Log.d(TAG, "\tERROR sendPushToView. SAVED NOTIFICATION: " + e.getMessage());
 			lastPush = payload;
-			FCMPlugin.savePush(payload);
+			FCMPlugin.savePush(payload.toString());
 		}
 	}
 
@@ -164,17 +164,32 @@ public class FCMPlugin extends CordovaPlugin {
 		}
 	}
 
-	public static Map<String, Object> getSavedPushes() {
+	public static void sendPushPayload(String payload) {
+		Log.d(TAG, "==> FCMPlugin sendPushPayload");
+		Log.d(TAG, "\tnotificationCallBackReady: " + notificationCallBackReady);
+		Log.d(TAG, "\tgWebView: " + gWebView);
+
+		String callBack = "javascript:" + notificationCallBack + "('" + payload + "')";
+		if(notificationCallBackReady && gWebView != null){
+			Log.d(TAG, "\tSent PUSH to view: " + callBack);
+			gWebView.sendJavascript(callBack);
+		}else {
+			Log.d(TAG, "\tView not ready. SAVED NOTIFICATION: " + callBack);
+			FCMPlugin.savePush(payload);
+		}
+
+	}
+
+	public static String getSavedPushes() {
 		String savedPushes = sharedPref.getString(notificationSavedPushesKey, null);
 		Log.d(TAG, "==> FCMPlugin getSavedPushes" + savedPushes );
 		return savedPushes;
 	}
 
-	public static void savePush(Map<String, Object> payload) {
-		String savedPushes = sharedPref.getString(notificationSavedPushesKey, null);
-		Log.d(TAG, "==> FCMPlugin savePush" + payload.toString() );
+	public static void savePush(String payload) {
+		Log.d(TAG, "==> FCMPlugin savePush" + payload );
 		SharedPreferences.Editor editor = sharedPref.edit();
-		editor.putString(notificationSavedPushesKey, payload.toString());
+		editor.putString(notificationSavedPushesKey, payload);
 		editor.commit();
 	}
   
