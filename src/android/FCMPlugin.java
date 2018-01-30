@@ -22,15 +22,18 @@ public class FCMPlugin extends CordovaPlugin {
 	private static final String TAG = "FCMPlugin";
 	
 	public static CordovaWebView gWebView;
+	public static SharedPreferences sharedPref;
+	public static String notificationSavedPushesKey = "FCMPluginSavedPushes";
 	public static String notificationCallBack = "FCMPlugin.onNotificationReceived";
 	public static String tokenRefreshCallBack = "FCMPlugin.onTokenRefreshReceived";
 	public static Boolean notificationCallBackReady = false;
 	public static Map<String, Object> lastPush = null;
-	 
+
 	public FCMPlugin() {}
 	
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 		super.initialize(cordova, webView);
+		sharedPref = cordova.getActivity().getSharedPreferences(notificationSavedPushesKey, Context.MODE_PRIVATE);
 		gWebView = webView;
 		Log.d(TAG, "==> FCMPlugin initialize");
 		FirebaseMessaging.getInstance().subscribeToTopic("android");
@@ -66,6 +69,8 @@ public class FCMPlugin extends CordovaPlugin {
 				notificationCallBackReady = true;
 				cordova.getActivity().runOnUiThread(new Runnable() {
 					public void run() {
+						string savedPushes = FCMPlugin.getSavedPushes();
+						if(savedPushes != null) FCMPlugin.sendPushPayload( savedPushes );
 						if(lastPush != null) FCMPlugin.sendPushPayload( lastPush );
 						lastPush = null;
 						callbackContext.success();
@@ -138,10 +143,12 @@ public class FCMPlugin extends CordovaPlugin {
 			}else {
 				Log.d(TAG, "\tView not ready. SAVED NOTIFICATION: " + callBack);
 				lastPush = payload;
+				FCMPlugin.savePush(payload);
 			}
 		} catch (Exception e) {
 			Log.d(TAG, "\tERROR sendPushToView. SAVED NOTIFICATION: " + e.getMessage());
 			lastPush = payload;
+			FCMPlugin.savePush(payload);
 		}
 	}
 
@@ -153,6 +160,20 @@ public class FCMPlugin extends CordovaPlugin {
 		} catch (Exception e) {
 			Log.d(TAG, "\tERROR sendRefreshToken: " + e.getMessage());
 		}
+	}
+
+	public static string getSavedPushes() {
+		String savedPushes = sharedPref.getString(notificationSavedPushesKey, null);
+		Log.d(TAG, "==> FCMPlugin getSavedPushes" + savedPushes );
+		return savedPushes;
+	}
+
+	public static void savePush(Map<String, Object> payload) {
+		String savedPushes = sharedPref.getString(notificationSavedPushesKey, null);
+		Log.d(TAG, "==> FCMPlugin savePush" + payload.toString() );
+		SharedPreferences.Editor editor = sharedPref.edit();
+		editor.putString(notificationSavedPushesKey, payload.toString());
+		editor.commit();
 	}
   
   @Override
