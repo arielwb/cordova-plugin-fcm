@@ -71,7 +71,7 @@ public class FCMPlugin extends CordovaPlugin {
 				notificationCallBackReady = true;
 				cordova.getActivity().runOnUiThread(new Runnable() {
 					public void run() {
-						string savedPushes = FCMPlugin.getSavedPushes();
+						String savedPushes = FCMPlugin.getSavedPushes();
 						if(savedPushes != null) FCMPlugin.sendPushPayload( savedPushes );
 						if(lastPush != null) FCMPlugin.sendPushPayload( lastPush );
 						lastPush = null;
