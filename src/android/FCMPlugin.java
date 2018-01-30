@@ -4,6 +4,7 @@ import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaInterface;
+import android.content.Context;
 import android.util.Log;
 import android.content.SharedPreferences;
 
@@ -12,6 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+
+import com.google.gson.Gson;
+import com.google.common.reflect.TypeToken;
+import java.lang.reflect.Type;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -163,7 +168,7 @@ public class FCMPlugin extends CordovaPlugin {
 		}
 	}
 
-	public static string getSavedPushes() {
+	public static Map<String, Object> getSavedPushes() {
 		String savedPushes = sharedPref.getString(notificationSavedPushesKey, null);
 		Log.d(TAG, "==> FCMPlugin getSavedPushes" + savedPushes );
 		return savedPushes;
