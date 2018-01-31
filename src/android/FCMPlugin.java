@@ -5,6 +5,7 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaInterface;
 import android.content.Context;
+import android.util.Base64;
 import android.util.Log;
 import android.content.SharedPreferences;
 
@@ -23,6 +24,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class FCMPlugin extends CordovaPlugin {
