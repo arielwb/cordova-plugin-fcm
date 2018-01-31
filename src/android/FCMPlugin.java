@@ -29,7 +29,6 @@ public class FCMPlugin extends CordovaPlugin {
 	public static String notificationCallBack = "FCMPlugin.onNotificationReceived";
 	public static String tokenRefreshCallBack = "FCMPlugin.onTokenRefreshReceived";
 	public static Boolean notificationCallBackReady = false;
-	public static Map<String, Object> lastPush = null;
 
 	public FCMPlugin() {}
 	
@@ -73,8 +72,6 @@ public class FCMPlugin extends CordovaPlugin {
 					public void run() {
 						String savedPushes = FCMPlugin.getSavedPushes();
 						if(savedPushes != null) FCMPlugin.sendPushPayload( savedPushes );
-						if(lastPush != null) FCMPlugin.sendPushPayload( lastPush );
-						lastPush = null;
 						callbackContext.success();
 					}
 				});
