@@ -14,6 +14,12 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -193,6 +199,47 @@ public class FCMPlugin extends CordovaPlugin {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(notificationSavedPushesKey, payload);
         editor.commit();
+      }
+
+      public static void sendPushConfirmation(Context context, final String messageId) {
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = "http://201.30.147.77:8098/servicessisare/rest/TControllerMensagemPush/setStatusEnvioMensagemPush";
+        final JSONObject jsonBody = new JSONObject();
+        try {
+          jsonBody.put("idEnvio", messageId.toString());
+          jsonBody.put("status", "2");
+        } catch (Exception e) {
+          Log.d(TAG, "\tERROR creating json: " + e.getMessage());
+        }
+    
+        JsonObjectRequest request = new JsonObjectRequest(url, jsonBody,
+          new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+              Log.d(TAG, "Response is: " + response.toString());
+            }
+          },
+          new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+              Log.d(TAG, "That didn't work! ->" + error.getMessage());
+            }
+          }
+        ) {
+          @Override
+          public Map<String, String> getHeaders() throws AuthFailureError {
+            Map<String, String> params = new HashMap<String, String>();
+            String credentials = "3EFU4&({H}00F:3EFU4&({H}00F";
+            String auth = "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
+    
+            params.put("Content-Type", "application/json");
+            params.put("Authorization", auth);
+            return params;
+          }
+        };
+    
+        queue.add(request);
       }
   
   @Override
