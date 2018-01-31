@@ -57,8 +57,10 @@
 					<action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
 				</intent-filter>
 			</service>
-             <uses-permission android:name="android.permission.INTERNET"/>
 		</config-file>
+        <config-file target="AndroidManifest.xml" parent="/*">
+          <uses-permission android:name="android.permission.INTERNET"/>
+      </config-file>
 		<config-file target="res/xml/config.xml" parent="/*">
 			<feature name="FCMPlugin" >
 					<param name="android-package" value="com.gae.scaffolder.plugin.FCMPlugin"/>
