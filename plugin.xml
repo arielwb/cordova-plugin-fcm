@@ -58,7 +58,7 @@
 				</intent-filter>
 			</service>
 		</config-file>
-        <config-file target="AndroidManifest.xml" parent="/*">
+        <config-file target="AndroidManifest.xml" parent="/manifest">
           <uses-permission android:name="android.permission.INTERNET"/>
       </config-file>
 		<config-file target="res/xml/config.xml" parent="/*">
