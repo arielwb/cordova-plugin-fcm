@@ -49,7 +49,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
 		
 		Log.d(TAG, "\tNotification Data: " + data.toString());
-        FCMPlugin.sendPushPayload( data );
+        FCMPlugin.sendPushPayload( data, getSharedPreferences(FCMPlugin.notificationSavedPushesKey, Context.MODE_PRIVATE));
 
         //TODO: Define push structure for system tray display
         sendNotification("TEST", data.toString(), data);

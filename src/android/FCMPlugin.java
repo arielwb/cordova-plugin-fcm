@@ -24,11 +24,11 @@ public class FCMPlugin extends CordovaPlugin {
 	private static final String TAG = "FCMPlugin";
 	
 	public static CordovaWebView gWebView;
-	public static SharedPreferences sharedPref;
 	public static String notificationSavedPushesKey = "FCMPluginSavedPushes";
 	public static String notificationCallBack = "FCMPlugin.onNotificationReceived";
 	public static String tokenRefreshCallBack = "FCMPlugin.onTokenRefreshReceived";
 	public static Boolean notificationCallBackReady = false;
+	public SharedPreferences sharedPref;
 
 	public FCMPlugin() {}
 	
@@ -71,7 +71,10 @@ public class FCMPlugin extends CordovaPlugin {
 				cordova.getActivity().runOnUiThread(new Runnable() {
 					public void run() {
 						String savedPushes = FCMPlugin.getSavedPushes();
-						if(savedPushes != null) FCMPlugin.sendPushPayload( savedPushes );
+						if (savedPushes != null){
+                            FCMPlugin.sendPushPayload(savedPushes);
+                            FCMPlugin.deleteSavedPushes();
+                          }
 						callbackContext.success();
 					}
 				});
@@ -125,10 +128,10 @@ public class FCMPlugin extends CordovaPlugin {
 		return true;
 	}
 	
-	public static void sendPushPayload(Map<String, Object> payload) {
-    
-        String json = maptoJsonString(payload);
-        sendPushPayload(json);
+    public static void sendPushPayload(Map<String, Object> payload, SharedPreferences sharedPref) {
+
+        String json = mapToJsonString(payload);
+        sendPushPayload(json, sharedPref);
       }
     
       public static void sendTokenRefresh(String token) {
@@ -141,7 +144,7 @@ public class FCMPlugin extends CordovaPlugin {
         }
       }
     
-      public static void sendPushPayload(String payload) {
+      public static void sendPushPayload(String payload, SharedPreferences sharedPref) {
         Log.d(TAG, "==> FCMPlugin sendPushPayload");
         Log.d(TAG, "\tnotificationCallBackReady: " + notificationCallBackReady);
         Log.d(TAG, "\tgWebView: " + gWebView);
@@ -152,31 +155,40 @@ public class FCMPlugin extends CordovaPlugin {
           gWebView.sendJavascript(callBack);
         } else {
           Log.d(TAG, "\tView not ready. SAVED NOTIFICATION: " + callBack);
-          FCMPlugin.savePush(payload);
+          FCMPlugin.savePush(payload, sharedPref);
         }
       }
     
-      public static String maptoJsonString(Map<String, Object> payload) {
+      public static String mapToJsonString(Map<String, Object> payload) {
         JSONObject jo = new JSONObject();
         try {
           for (String key : payload.keySet()) {
             jo.put(key, payload.get(key));
             Log.d(TAG, "\tpayload: " + key + " => " + payload.get(key));
-            return jo.toString();
           }
+    
         } catch (Exception e) {
           Log.d(TAG, "\tERROR toJsonString: " + e.getMessage());
         }
-        return payload.toString();
+        String data = jo.length() > 0 ? jo.toString() : payload.toString();
+        return data;
       }
     
-      public static String getSavedPushes() {
+      public static String getSavedPushes(SharedPreferences sharedPref) {
         String savedPushes = sharedPref.getString(notificationSavedPushesKey, null);
         Log.d(TAG, "==> FCMPlugin getSavedPushes" + savedPushes);
         return savedPushes;
       }
     
-      public static void savePush(String payload) {
+      public static void deleteSavedPushes(SharedPreferences sharedPref) {
+    
+        Log.d(TAG, "==> FCMPlugin deleteSavedPushes");
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.remove(notificationSavedPushesKey);
+        editor.apply();
+      }
+    
+      public static void savePush(String payload, SharedPreferences sharedPref) {
         Log.d(TAG, "==> FCMPlugin savePush" + payload);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(notificationSavedPushesKey, payload);
