@@ -70,10 +70,10 @@ public class FCMPlugin extends CordovaPlugin {
 				notificationCallBackReady = true;
 				cordova.getActivity().runOnUiThread(new Runnable() {
 					public void run() {
-						String savedPushes = FCMPlugin.getSavedPushes();
+						String savedPushes = FCMPlugin.getSavedPushes(sharedPref);
 						if (savedPushes != null){
-                            FCMPlugin.sendPushPayload(savedPushes);
-                            FCMPlugin.deleteSavedPushes();
+                            FCMPlugin.sendPushPayload(savedPushes, sharedPref);
+                            FCMPlugin.deleteSavedPushes(sharedPref);
                           }
 						callbackContext.success();
 					}
