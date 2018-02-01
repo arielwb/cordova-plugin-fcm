@@ -39,7 +39,7 @@ public class FCMPlugin extends CordovaPlugin {
 	public static String pushStorageKey = "FCMPluginSavedPushes";
 	public static String pushDataTitleKey = "title";
 	public static String pushDataBodyKey = "msg";
-	public static String pushIconName = "ttPushIcon";
+	public static String pushIconName = "tt_push_icon";
 	public static String pushIconColor = "#1CABE7";
 	public static String pushConfirmationUrl = "http://201.30.147.77:8098/servicessisare/rest/TControllerMensagemPush/setStatusEnvioMensagemPush";
 	public SharedPreferences sharedPref;
