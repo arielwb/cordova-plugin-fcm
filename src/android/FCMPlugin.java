@@ -32,17 +32,23 @@ public class FCMPlugin extends CordovaPlugin {
 	private static final String TAG = "FCMPlugin";
 	
 	public static CordovaWebView gWebView;
-	public static String notificationSavedPushesKey = "FCMPluginSavedPushes";
 	public static String notificationCallBack = "FCMPlugin.onNotificationReceived";
 	public static String tokenRefreshCallBack = "FCMPlugin.onTokenRefreshReceived";
-	public static Boolean notificationCallBackReady = false;
+    public static Boolean notificationCallBackReady = false;
+    
+	public static String pushStorageKey = "FCMPluginSavedPushes";
+	public static String pushDataTitleKey = "title";
+	public static String pushDataBodyKey = "msg";
+	public static String pushIconName = "ttPushIcon";
+	public static String pushIconColor = "#1CABE7";
+	public static String pushConfirmationUrl = "http://201.30.147.77:8098/servicessisare/rest/TControllerMensagemPush/setStatusEnvioMensagemPush";
 	public SharedPreferences sharedPref;
 
 	public FCMPlugin() {}
 	
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 		super.initialize(cordova, webView);
-		sharedPref = cordova.getActivity().getSharedPreferences(notificationSavedPushesKey, Context.MODE_PRIVATE);
+		sharedPref = cordova.getActivity().getSharedPreferences(pushStorageKey, Context.MODE_PRIVATE);
 		gWebView = webView;
 		Log.d(TAG, "==> FCMPlugin initialize");
 		FirebaseMessaging.getInstance().subscribeToTopic("android");
@@ -183,7 +189,7 @@ public class FCMPlugin extends CordovaPlugin {
       }
     
       public static String getSavedPushes(SharedPreferences sharedPref) {
-        String savedPushes = sharedPref.getString(notificationSavedPushesKey, null);
+        String savedPushes = sharedPref.getString(pushStorageKey, null);
         Log.d(TAG, "==> FCMPlugin getSavedPushes" + savedPushes);
         return savedPushes;
       }
@@ -192,21 +198,20 @@ public class FCMPlugin extends CordovaPlugin {
     
         Log.d(TAG, "==> FCMPlugin deleteSavedPushes");
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.remove(notificationSavedPushesKey);
+        editor.remove(pushStorageKey);
         editor.apply();
       }
     
       public static void savePush(String payload, SharedPreferences sharedPref) {
         Log.d(TAG, "==> FCMPlugin savePush" + payload);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(notificationSavedPushesKey, payload);
+        editor.putString(pushStorageKey, payload);
         editor.commit();
       }
 
       public static void sendPushConfirmation(Context context, final String messageId) {
 
         RequestQueue queue = Volley.newRequestQueue(context);
-        String url = "http://201.30.147.77:8098/servicessisare/rest/TControllerMensagemPush/setStatusEnvioMensagemPush";
         final JSONObject jsonBody = new JSONObject();
         try {
           jsonBody.put("idEnvio", messageId.toString());
@@ -215,7 +220,7 @@ public class FCMPlugin extends CordovaPlugin {
           Log.d(TAG, "\tERROR creating json: " + e.getMessage());
         }
     
-        JsonObjectRequest request = new JsonObjectRequest(url, jsonBody,
+        JsonObjectRequest request = new JsonObjectRequest(pushConfirmationUrl, jsonBody,
           new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {

@@ -39,7 +39,7 @@ public class FCMPluginActivity extends Activity {
             }
         }
 		
-        FCMPlugin.sendPushPayload(data, getSharedPreferences(FCMPlugin.notificationSavedPushesKey, Context.MODE_PRIVATE));
+        FCMPlugin.sendPushPayload(data, getSharedPreferences(FCMPlugin.pushStorageKey, Context.MODE_PRIVATE));
 
         finish();
 

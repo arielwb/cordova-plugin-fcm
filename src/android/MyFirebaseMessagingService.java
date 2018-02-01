@@ -50,11 +50,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
 		
 		Log.d(TAG, "\tNotification Data: " + data.toString());
-        FCMPlugin.sendPushPayload( data, getSharedPreferences(FCMPlugin.notificationSavedPushesKey, Context.MODE_PRIVATE));
+        FCMPlugin.sendPushPayload( data, getSharedPreferences(FCMPlugin.pushStorageKey, Context.MODE_PRIVATE));
         FCMPlugin.sendPushConfirmation(this.getApplicationContext(), "1");
 
-        //TODO: Define push structure for system tray display
-        sendNotification("TEST", data.toString(), data);
+        String displayTitle = data.get(FCMPlugin.pushDataTitleKey) != null ? data.get(FCMPlugin.pushDataTitleKey).toString() : "Turistur"; 
+        String displayBody = data.get(FCMPlugin.pushDataBodyKey) != null ? data.get(FCMPlugin.pushDataBodyKey).toString() : "Você tem uma nova notificação da Turistur. Abra o app e confira!"; 
+
+        sendNotification(displayTitle, displayBody, data);
     }
     // [END receive_message]
 
@@ -74,12 +76,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-            .setSmallIcon(getApplicationContext().getResources().getIdentifier("ic_stat_group","drawable", getApplicationContext().getPackageName()))
+            .setSmallIcon(getApplicationContext().getResources().getIdentifier(FCMPlugin.pushIconName,"drawable", getApplicationContext().getPackageName()))
             .setContentTitle(title)
             .setContentText(messageBody)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
-            .setColor(Color.parseColor("#1CABE7"))
+            .setColor(Color.parseColor(FCMPlugin.pushIconColor))
             .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager =
