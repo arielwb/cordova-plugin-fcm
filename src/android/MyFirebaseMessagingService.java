@@ -11,8 +11,6 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import java.util.Map;
 import java.util.HashMap;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -45,9 +43,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 		
 		Map<String, Object> data = new HashMap<String, Object>();
         data.put("wasTapped", false);
-        SimpleDateFormat formatter = new SimpleDateFormat("EE MMM d y H:m:s ZZZ");
-        String dateString = formatter.format(new Date());
-        data.put("received", dateString);
+        data.put("received", new Date().getTime());
 		for (String key : remoteMessage.getData().keySet()) {
                 Object value = remoteMessage.getData().get(key);
                 Log.d(TAG, "\tKey: " + key + " Value: " + value);

@@ -13,8 +13,6 @@ import android.util.Log;
 
 import java.util.Map;
 import java.util.HashMap;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class FCMPluginActivity extends Activity {
     private static String TAG = "FCMPlugin";
@@ -34,9 +32,7 @@ public class FCMPluginActivity extends Activity {
         if (getIntent().getExtras() != null) {
 			Log.d(TAG, "==> USER TAPPED NOTFICATION");
             data.put("wasTapped", true);
-            SimpleDateFormat formatter = new SimpleDateFormat("EE MMM d y H:m:s ZZZ");
-            String dateString = formatter.format(new Date());
-            data.put("received", dateString);
+            data.put("received", new Date().getTime());
 			for (String key : getIntent().getExtras().keySet()) {
                 String value = getIntent().getExtras().getString(key);
                 Log.d(TAG, "\tKey: " + key + " Value: " + value);
