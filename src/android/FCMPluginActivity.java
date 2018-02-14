@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
+import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -31,7 +31,8 @@ public class FCMPluginActivity extends Activity {
 		Map<String, Object> data = new HashMap<String, Object>();
         if (getIntent().getExtras() != null) {
 			Log.d(TAG, "==> USER TAPPED NOTFICATION");
-			data.put("wasTapped", true);
+            data.put("wasTapped", true);
+            data.put("received", new Date().getTime());
 			for (String key : getIntent().getExtras().keySet()) {
                 String value = getIntent().getExtras().getString(key);
                 Log.d(TAG, "\tKey: " + key + " Value: " + value);
