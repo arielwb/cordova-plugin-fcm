@@ -111,28 +111,30 @@ NSString *const kGCMMessageIDKey = @"gcm.message_id";
 #if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
 
 // Handle incoming notification messages while app is in the foreground.
-- (void)userNotificationCenter:(UNUserNotificationCenter *)center
-       willPresentNotification:(UNNotification *)notification
-         withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
-    // Print message ID.
-    NSDictionary *userInfo = notification.request.content.userInfo;
-    if (userInfo[kGCMMessageIDKey]) {
-        NSLog(@"Message ID 1: %@", userInfo[kGCMMessageIDKey]);
-    }
-    
-    // Print full message.
-    NSLog(@"%@", userInfo);
-    
-    NSError *error;
-    NSDictionary *userInfoMutable = [userInfo mutableCopy];
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfoMutable
-                                                       options:0
-                                                         error:&error];
-    [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
-    
-    // Change this to your preferred presentation option
-    completionHandler(UNNotificationPresentationOptionNone);
-}
+//- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+//       willPresentNotification:(UNNotification *)notification
+//         withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+//    // Print message ID.
+//    NSDictionary *userInfo = notification.request.content.userInfo;
+//    if (userInfo[kGCMMessageIDKey]) {
+//        NSLog(@"Message ID 1: %@", userInfo[kGCMMessageIDKey]);
+//    }
+//   
+//    // Print full message.
+//    NSLog(@"%@", userInfo);
+//   
+//    NSError *error;
+//    NSDictionary *userInfoMutable = [userInfo mutableCopy];
+//    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfoMutable
+//                                                       options:0
+//                                                         error:&error];
+//    [FCMPlugin.fcmPlugin notifyOfMessage:[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]];
+//    NSString *msgId = [userInfoMutable valueForKey:@"id"];    
+//    [self markAsReceived: msgId];
+//
+//    // Change this to your preferred presentation option
+//    completionHandler(UNNotificationPresentationOptionBadge);
+//}
 
 // Handle notification messages after display notification is tapped by the user.
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center
@@ -150,15 +152,18 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     NSDictionary *userInfoMutable = [userInfo mutableCopy];
     
 
-        NSLog(@"New method with push callback: %@", userInfo);
-        
-        [userInfoMutable setValue:@(YES) forKey:@"wasTapped"];
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfoMutable
-                                                           options:0
-                                                             error:&error];
-        NSLog(@"APP WAS CLOSED DURING PUSH RECEPTION Saved data: %@", jsonData);
-        lastPush = jsonData;
+    NSLog(@"New method with push callback: %@", userInfo);
+    
+    [userInfoMutable setValue:@(YES) forKey:@"wasTapped"];
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfoMutable
+                                                        options:0
+                                                            error:&error];
+    NSLog(@"APP WAS CLOSED DURING PUSH RECEPTION Saved data: %@", jsonData);
+    lastPush = jsonData;
+    [self savePush:[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]];
 
+    NSString *msgId = [userInfoMutable valueForKey:@"id"];
+    [self markAsReceived: msgId];
     
     completionHandler();
 }
@@ -172,6 +177,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
+
     // Short-circuit when actually running iOS 10+, let notification centre methods handle the notification.
     if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_9_x_Max) {
         return;
@@ -190,8 +196,14 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
                                                            options:0
                                                              error:&error];
         NSLog(@"APP WAS CLOSED DURING PUSH RECEPTION Saved data: %@", jsonData);
-        lastPush = jsonData;
+        //lastPush = jsonData;
+        [self savePush:[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]];
+        
+        NSString *msgId = [userInfoMutable valueForKey:@"id"];
+        [self markAsReceived: msgId];
+
     }
+
 }
 // [END receive_message in background] iOS < 10]
 
@@ -200,9 +212,9 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
     // Short-circuit when actually running iOS 10+, let notification centre methods handle the notification.
-    if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_9_x_Max) {
-        return;
-    }
+//    if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_9_x_Max) {
+//        return;
+//    }
 
     // If you are receiving a notification message while your app is in the background,
     // this callback will not be fired till the user taps on the notification launching the application.
@@ -223,19 +235,49 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
     //                              foreground (user taps notification)
 
     UIApplicationState state = application.applicationState;
-    if (application.applicationState == UIApplicationStateActive
-        || application.applicationState == UIApplicationStateInactive) {
         [userInfoMutable setValue:@(NO) forKey:@"wasTapped"];
         NSLog(@"app active");
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfoMutable
                                                            options:0
                                                              error:&error];
-        [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
+
+    if (FCMPlugin.fcmPlugin != nil && (state == UIApplicationStateActive || state == UIApplicationStateInactive)) {
+        [FCMPlugin.fcmPlugin notifyOfMessage:[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]];
+        NSLog(@"%@", FCMPlugin.fcmPlugin);
 
     // app is in background
     }
+    else{
+        [self savePush:[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]];
+        
+    }
+    NSString *msgId = [userInfoMutable valueForKey:@"id"];
+    [self markAsReceived: msgId];
 
-    completionHandler(UIBackgroundFetchResultNoData);
+//    UNMutableNotificationContent *content = [[UNMutableNotificationContent alloc] init];
+//    content.title = @"local";
+//    content.body = @"delegate";
+//    
+//    // Configure the trigger for a 7am wakeup.
+//    //NSDateComponents* date = [[NSDateComponents alloc] init];
+//    //date.second = 10;
+//    //    UNCalendarNotificationTrigger* trigger = [UNCalendarNotificationTrigger triggerWithDateMatchingComponents:date repeats:NO];
+//    
+//    UNTimeIntervalNotificationTrigger* trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1 repeats:NO];
+//    
+//    // Create the request object.
+//    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"MorningAlarm" content:content trigger:trigger];
+//    
+//    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+//    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+//        if (error != nil) {
+//            NSLog(@"%@", error.localizedDescription);
+//        }
+//    }];
+    
+    //NSLog(@"NotificationRequest %@", request);
+
+    completionHandler(UIBackgroundFetchResultNewData);
 }
 // [END receive_message iOS < 10]
 // [END message_handling]
@@ -306,4 +348,74 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 }
 
 
+-(void) savePush:(NSString *)payload
+{
+    NSMutableString* stringPush = [NSMutableString string];
+    NSString* data = [self getPush];
+    if(data != nil){
+        [stringPush appendFormat:@"%@,", data];
+    }
+    
+    [stringPush appendString:payload];
+    
+    NSUserDefaults *pref = [NSUserDefaults standardUserDefaults];
+    
+    [pref setObject:stringPush forKey:@"FCMPluginSavedPushes"];
+    
+    NSLog(@"Saving push to storage %@", stringPush);
+    
+}
+
+-(NSString*) getPush
+{
+    NSLog(@"Get push from storage");
+    NSUserDefaults *pref = [NSUserDefaults standardUserDefaults];
+    NSString *savedPushes = [pref stringForKey:@"FCMPluginSavedPushes"];
+    
+    return savedPushes;
+}
+
+- (void) markAsReceived:(NSString *)messageId
+{
+    NSArray *keys = [NSArray arrayWithObjects:@"status", @"idEnvio", nil];
+    NSArray *objects = [NSArray arrayWithObjects:@"2", messageId, nil];
+    
+    NSDictionary *jsonDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
+    
+    NSData *__jsonData = [NSJSONSerialization dataWithJSONObject:jsonDictionary options:0 error:nil];
+
+    
+    // Be sure to properly escape your url string.
+    NSURL *url = [NSURL URLWithString:@"http://201.30.147.77:8098/servicessisare/rest/TControllerMensagemPush/setStatusEnvioMensagemPush"];
+
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPBody: __jsonData];
+    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    [request setValue:[NSString stringWithFormat:@"%lu", (unsigned long)[__jsonData length]] forHTTPHeaderField:@"Content-Length"];
+    
+    NSString *user = @"3EFU4&({H}00F";
+    NSString *authStr = [NSString stringWithFormat:@"%@:%@", user, user];
+    NSData *authData = [authStr dataUsingEncoding:NSASCIIStringEncoding];
+    NSString *authValue = [NSString stringWithFormat:@"Basic %@", [authData base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed]];
+    
+    [request setValue:authValue forHTTPHeaderField:@"Authorization"];
+
+    
+    NSError *errorReturned = nil;
+    NSURLResponse *theResponse =[[NSURLResponse alloc]init];
+    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&theResponse error:&errorReturned];
+    
+
+    if (errorReturned) {
+        NSLog(@"Error saving message as received - %@ ", messageId);
+    }
+    else
+    {
+        NSError *jsonParsingError = nil;
+        NSArray *jsonArray = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers|NSJSONReadingAllowFragments error:&jsonParsingError];
+        NSLog(@"jsonArray - %@", jsonArray);
+    }
+
+}
 @end

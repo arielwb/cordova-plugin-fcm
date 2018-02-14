@@ -37,7 +37,7 @@ public class FCMPlugin extends CordovaPlugin {
     public static Boolean notificationCallBackReady = false;
     
 	public static String pushStorageKey = "FCMPluginSavedPushes";
-	public static String pushDataTitleKey = "title";
+	public static String pushDataTitleKey = "titulo";
 	public static String pushDataBodyKey = "msg";
 	public static String pushIconName = "tt_push_icon";
 	public static String pushIconColor = "#1CABE7";

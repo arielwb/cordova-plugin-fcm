@@ -79,9 +79,17 @@ static FCMPlugin *fcmPluginInstance;
     NSLog(@"view registered for notifications");
     
     notificatorReceptorReady = YES;
-    NSData* lastPush = [AppDelegate getLastPush];
-    if (lastPush != nil) {
-        [FCMPlugin.fcmPlugin notifyOfMessage:lastPush];
+//    NSData* lastPush = [AppDelegate getLastPush];
+//    if (lastPush != nil) {
+//        [FCMPlugin.fcmPlugin notifyOfMessage:lastPush];
+//    }
+    
+    
+    NSString* savedPush = [FCMPlugin.fcmPlugin getPush];
+    NSLog(@"savedPush %@", savedPush);
+    if (savedPush != nil) {
+        [FCMPlugin.fcmPlugin notifyOfMessage:savedPush];
+        [FCMPlugin.fcmPlugin clearSavedPushes];
     }
     
     CDVPluginResult* pluginResult = nil;
@@ -89,10 +97,10 @@ static FCMPlugin *fcmPluginInstance;
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
--(void) notifyOfMessage:(NSData *)payload
+-(void) notifyOfMessage:(NSString *)payload
 {
-    NSString *JSONString = [[NSString alloc] initWithBytes:[payload bytes] length:[payload length] encoding:NSUTF8StringEncoding];
-    NSString * notifyJS = [NSString stringWithFormat:@"%@(%@);", notificationCallback, JSONString];
+    
+    NSString * notifyJS = [NSString stringWithFormat:@"%@([%@]);", notificationCallback, payload];
     NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
     
     if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
@@ -100,6 +108,9 @@ static FCMPlugin *fcmPluginInstance;
     } else {
         [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
     }
+
+
+
 }
 
 -(void) notifyOfTokenRefresh:(NSString *)token
@@ -123,11 +134,37 @@ static FCMPlugin *fcmPluginInstance;
 -(void) appEnterForeground
 {
     NSLog(@"Set state foreground");
-    NSData* lastPush = [AppDelegate getLastPush];
-    if (lastPush != nil) {
-        [FCMPlugin.fcmPlugin notifyOfMessage:lastPush];
+//    NSData* lastPush = [AppDelegate getLastPush];
+    NSString* savedPush = [self getPush];
+//    if (lastPush != nil) {
+//        [FCMPlugin.fcmPlugin notifyOfMessage:lastPush];
+//    }
+    if (savedPush != nil) {
+        [FCMPlugin.fcmPlugin notifyOfMessage:savedPush];
     }
+
     appInForeground = YES;
 }
+
+
+-(NSString*) getPush
+{
+    NSLog(@"Get push from storage");
+    NSUserDefaults *pref = [NSUserDefaults standardUserDefaults];
+    NSString *savedPushes = [pref stringForKey:@"FCMPluginSavedPushes"];
+    
+    return savedPushes;
+}
+
+
+-(void) clearSavedPushes
+{
+    NSLog(@"Removing saved pushes");
+    NSUserDefaults *pref = [NSUserDefaults standardUserDefaults];
+    [pref removeObjectForKey:@"FCMPluginSavedPushes"];
+}
+
+
+
 
 @end

@@ -13,5 +13,7 @@
 @interface AppDelegate (FCMPlugin)
 
 + (NSData*)getLastPush;
+-(void) savePush:(NSString *)payload;
+-(NSString*) getPush;
 
 @end
