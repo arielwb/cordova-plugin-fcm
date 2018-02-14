@@ -155,6 +155,8 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     NSLog(@"New method with push callback: %@", userInfo);
     
     [userInfoMutable setValue:@(YES) forKey:@"wasTapped"];
+    NSTimeInterval timeInSeconds = [[NSDate date] timeIntervalSince1970];
+    [userInfoMutable setValue:[NSNumber numberWithFloat:timeInSeconds] forKey:@"received"];
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfoMutable
                                                         options:0
                                                             error:&error];
@@ -192,6 +194,8 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
         NSLog(@"New method with push callback: %@", userInfo);
         
         [userInfoMutable setValue:@(YES) forKey:@"wasTapped"];
+        NSTimeInterval timeInSeconds = [[NSDate date] timeIntervalSince1970];
+        [userInfoMutable setValue:[NSNumber numberWithFloat:timeInSeconds] forKey:@"received"];
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfoMutable
                                                            options:0
                                                              error:&error];
@@ -236,6 +240,8 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 
     UIApplicationState state = application.applicationState;
         [userInfoMutable setValue:@(NO) forKey:@"wasTapped"];
+        NSTimeInterval timeInSeconds = [[NSDate date] timeIntervalSince1970];
+        [userInfoMutable setValue:[NSNumber numberWithFloat:timeInSeconds] forKey:@"received"];
         NSLog(@"app active");
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfoMutable
                                                            options:0
