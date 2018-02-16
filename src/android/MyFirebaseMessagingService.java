@@ -54,7 +54,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (!data.get("tipo").equals("1")) {
             FCMPlugin.sendPushPayload(data, getSharedPreferences(FCMPlugin.pushStorageKey, Context.MODE_PRIVATE));
         }
-        FCMPlugin.sendPushConfirmation(this.getApplicationContext(), data.get("id"));
+        FCMPlugin.sendPushConfirmation(this.getApplicationContext(), String.valueOf(data.get("id")));
 
         String displayTitle = data.get(FCMPlugin.pushDataTitleKey) != null
                 ? data.get(FCMPlugin.pushDataTitleKey).toString()
