@@ -1,7 +1,58 @@
+## Este é um fork do cordova-plugin-fcm, com modificações para atender requisitos específicos da Turistur
+
+#### O que foi implementado:
+- Save do payload das notificações push quando o aplicativo está fechado
+- Informar o Sisare que a mensagem foi recebida
+- Registrar a data do recebimento
+
+#### Como funciona
+- O Fcm dispara uma notificação para o device
+- Se o app está aberto (foreground ou background) ou fechado em um android, a notificação é exibida na bandeja do sistema, o payload da notificação é salvo e o sisare é comunicado do recebimento
+- No iOS, se o app foi fechado pelo usuário, a notificação é exibida na bandeja, e só será processada pelo aplicativo se o usuário clicar na notificação.
+
+#### Gotchas
+- No android, a notificação que aparece na bandeja é enviada pelo app. No ios, é pelo payload da notificação, dentro de `Alert`
+- O post que informa o sisare que a notificação foi recebida só é enviado em notificações do tipo `Comunicado` e `Questionario` 
+
+#### Refencia de payload a ser enviado ao FCM
+
+```json
+{
+  "message":{
+     "token":"fFSBjDbuZSg:APA91bFXGzyxpTc6S5Z9vrT4gbMgnfZEX8I1_Wk9b2woCuHk3h8Wdqparo8jJnmTXpiQzHQoUAPGsaHaeeDH9oP1_3t6LagTI0UjF-QUEqVxd-mpJmfP3LhgQkLmCalm7F7hwbRCbcRP",
+     "apns": { // configurações especificas para o IOS
+       "payload": {
+         "aps": {
+		    "content-available": 1, //necessário para processar dados em background
+		    "alert": {
+	    		"title": "Turistur - Comunicado", //Titulo da notificação na bandeja 
+	    		"body": "O conteúdo da mensagem" //Conteúdo da notificação na bandeja
+		    }
+         }
+       }
+     },
+     "android": {
+	    "priority":"high"
+  },
+     "data":{ //Payload processado em background
+       "id": "13",
+        "idPax": "289496",
+        "localizador": "X75768B",
+        "coditemos": "570118",
+        "titulo": "Turistur - Comunicado", //Titulo da notificação na bandeja do Android e no app
+        "msg": "O conteúdo da mensagem", //Conteúdo da notificação na bandeja do Android e no app
+        "status": "1", //status do sisare
+        "tipo": "1" //tipo da mensagem
+    }
+   }
+ }
+```
+
+===================================== Plugin docs ==============================================
+
+
 # Google Firebase Cloud Messaging Cordova Push Plugin
 > Extremely easy plug&play push notification plugin for Cordova applications with Google Firebase FCM.
-
->[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VF654BMGUPQTJ)
 
 #### Version 2.1.2 (03/06/2017)
 - Tested on Android and iOS using Cordova cli 6.4.0, Cordova android 6.0.0 and Cordova ios 4.3.1
